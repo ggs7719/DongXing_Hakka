@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>竹北東興圳綠意水脈・虛實整合（OMO）實境導覽系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            water: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 360 視角簡易模擬容器 */
+    .panorama-viewer {
+      background: radial-gradient(circle at center, #244131 0%, #0d1e15 100%);
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+    }
+    .panorama-viewer:active {
+      cursor: grabbing;
+    }
+    .water-wave {
+      background: linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(34,197,94,0.12) 100%);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans pb-24 md:pb-8 selection:bg-brand-500 selection:text-white">
+
+  <!-- 頂部導航列 -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-water-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+          <i class="fa-solid fa-water text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-slate-900 leading-tight">竹北東興圳・水與綠</h1>
+          <p class="text-xs text-brand-700 font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+            OMO 虛實整合探索實境解謎
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側小隊狀態 -->
+      <div class="flex items-center space-x-2">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1 flex items-center space-x-2 cursor-pointer hover:bg-emerald-100 transition" onclick="switchTab('team')">
+          <i class="fa-solid fa-users text-emerald-600 text-xs"></i>
+          <span class="text-xs font-semibold text-emerald-900" id="headerTeamBadge">第 3 小隊</span>
+          <span class="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold" id="headerScore">320pt</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="max-w-5xl mx-auto px-4 py-4">
+
+    <!-- TAB 1: 實境解謎遊程 (閉環機制：指引 ➔ 實地踏查 ➔ 回站驗證 ➔ 店家獎勵) -->
+    <section id="tab-quest" class="tab-pane space-y-4">
+      
+      <!-- 歡迎與進度卡片 -->
+      <div class="bg-gradient-to-br from-brand-800 via-brand-700 to-teal-800 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 relative z-10">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-medium backdrop-blur-sm mb-2 text-emerald-100">
+              <i class="fa-solid fa-compass"></i> 四段閉環解謎遊程進行中
+            </div>
+            <h2 class="text-xl font-bold">10-20 人團體協作・水脈巡禮競賽</h2>
+            <p class="text-emerald-100/90 text-xs mt-1 leading-relaxed">
+              透過線上 360 環景線索與植物辨識，實地走訪東興圳沿線解開 6 大水脈謎題，兌換商圈專屬好禮！
+            </p>
+          </div>
+          <div class="bg-black/25 backdrop-blur-md rounded-xl p-3 border border-white/10 flex items-center gap-4 shrink-0">
+            <div class="text-center">
+              <div class="text-[10px] text-emerald-200">解謎進度</div>
+              <div class="text-lg font-bold text-white"><span id="questSolvedCount">2</span> / 6</div>
+            </div>
+            <div class="h-8 w-px bg-white/20"></div>
+            <div class="text-center">
+              <div class="text-[10px] text-emerald-200">圖鑑解鎖</div>
+              <div class="text-lg font-bold text-white"><span id="plantUnlockedCount">18</span> / 90</div>
+            </div>
+            <div class="h-8 w-px bg-white/20"></div>
+            <div class="text-center">
+              <div class="text-[10px] text-emerald-200">獲得優惠券</div>
+              <div class="text-lg font-bold text-amber-300"><span id="couponCount">2</span> 張</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 進度條 -->
+        <div class="mt-4 pt-3 border-t border-white/15">
+          <div class="flex justify-between text-xs text-emerald-200 mb-1">
+            <span>遊程總體完成度</span>
+            <span class="font-bold">33%</span>
+          </div>
+          <div class="w-full bg-black/30 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-300 to-emerald-300 h-full rounded-full transition-all duration-500" style="width: 33%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 大實境關卡清單 -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-map-pin text-emerald-600"></i> 六大關卡探索任務
+          </h3>
+          <span class="text-xs text-slate-500">線上指引 ➔ 實地踏查 ➔ 線上驗證 ➔ 店家獎勵</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="questsContainer">
+          <!-- 由 JavaScript 動態生成關卡卡片 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: 360 度全景熱點探索 (28 幅實景分區) -->
+    <section id="tab-360" class="tab-pane hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-street-view text-water-600"></i>
+              28 幅現場實景 360 度虛擬地圖
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">點選不同分區節點，拖曳視野探索隱藏熱點與解謎線索</p>
+          </div>
+          
+          <!-- 分區切換鈕 -->
+          <div class="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar" id="zoneTabsContainer">
+            <!-- 動態生成 Zone A~G 切換鈕 -->
+          </div>
+        </div>
+
+        <!-- 360 模擬檢視器 -->
+        <div class="rounded-xl overflow-hidden border border-slate-200 relative">
+          <div id="panoramaViewer" class="panorama-viewer w-full h-80 md:h-96 flex items-center justify-center text-white relative">
+            
+            <!-- 背景全景模擬圖示與動態環境 -->
+            <div id="panoBackground" class="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-80" style="background-image: radial-gradient(circle, rgba(16,78,51,0.6) 0%, rgba(8,28,18,0.95) 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 12px);">
+            </div>
+
+            <!-- 全景中央景觀模擬物件 -->
+            <div class="relative z-10 text-center px-4 max-w-md">
+              <span id="panoBadge" class="bg-emerald-500/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-md font-semibold inline-block mb-2">Zone A・A1 視角</span>
+              <h3 id="panoTitle" class="text-xl md:text-2xl font-bold tracking-wide">公24公園・水岸入口全景</h3>
+              <p id="panoDesc" class="text-xs md:text-sm text-slate-200 mt-1 line-clamp-2">開圳紀念石碑辨識與水閘門結構熱點探索</p>
+              
+              <div class="mt-4 flex items-center justify-center gap-2">
+                <button onclick="interactHotspot('stone')" class="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/40 text-xs px-3 py-1.5 rounded-lg text-white font-medium transition flex items-center gap-1.5 shadow">
+                  <i class="fa-solid fa-magnifying-glass-location text-amber-300 animate-bounce"></i>
+                  熱點 1：開圳紀念石碑
+                </button>
+                <button onclick="interactHotspot('gate')" class="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/40 text-xs px-3 py-1.5 rounded-lg text-white font-medium transition flex items-center gap-1.5 shadow">
+                  <i class="fa-solid fa-water text-cyan-300"></i>
+                  熱點 2：百年水閘門
+                </button>
+              </div>
+            </div>
+
+            <!-- 控制提示 -->
+            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-[10px] text-slate-300 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <i class="fa-solid fa-arrows-up-down-left-right text-emerald-400"></i>
+              可滑動 360° 旋轉視角比對實景
+            </div>
+            
+            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-xs text-white px-3 py-1 rounded-lg flex items-center gap-2">
+              <i class="fa-solid fa-camera text-emerald-400"></i>
+              <span id="panoIndexText">節點 1 / 4 (A1)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 該分區內的所有 360 視角節點清單 -->
+        <div class="mt-4">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">此區域所有 360 視角節點</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="nodeListContainer">
+            <!-- 視角縮圖鈕由 JS 產生 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: 90 幅植物微型圖鑑 (五大分區) -->
+    <section id="tab-plants" class="tab-pane hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-leaf text-emerald-600"></i>
+              東興圳植物微型圖鑑（90 種特寫收錄）
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">實地踏查辨識現場原生植物，比對特徵並解鎖小隊生態勳章</p>
+          </div>
+          
+          <!-- 搜尋與篩選 -->
+          <div class="relative w-full md:w-64">
+            <input type="text" id="plantSearchInput" oninput="filterPlants()" placeholder="搜尋植物名稱或特徵..." class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-brand-500 focus:bg-white transition">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          </div>
+        </div>
+
+        <!-- 五大生態分類標籤切換 -->
+        <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar text-xs" id="plantCategoryTabs">
+          <button onclick="setPlantCategory('all')" class="plant-cat-btn active px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-brand-600 text-white shadow-sm" data-category="all">
+            全部 (90)
+          </button>
+          <button onclick="setPlantCategory('trees')" class="plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="trees">
+            挺水與濱水喬木 (25)
+          </button>
+          <button onclick="setPlantCategory('water')" class="plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="water">
+            水生與濕地植物 (20)
+          </button>
+          <button onclick="setPlantCategory('shrubs')" class="plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="shrubs">
+            岸邊綠籬與灌木 (20)
+          </button>
+          <button onclick="setPlantCategory('nectar')" class="plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="nectar">
+            蜜源與誘蝶植物 (15)
+          </button>
+          <button onclick="setPlantCategory('herbs')" class="plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="herbs">
+            地被與蕨類草本 (10)
+          </button>
+        </div>
+
+        <!-- 植物卡片清單網格 -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4" id="plantGridContainer">
+          <!-- 由 JS 動態產生植物卡片 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 商圈合作店家（8 家）與專屬優惠券 -->
+    <section id="tab-shops" class="tab-pane hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="mb-4">
+          <div class="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+            <i class="fa-solid fa-gift"></i> 在地商圈共榮合作
+          </div>
+          <h2 class="text-lg font-bold text-slate-800 mt-1">串聯文興路與嘉豐南/北路 8 家合作店家</h2>
+          <p class="text-xs text-slate-500 mt-0.5">完成各關卡實境踏查任務，即可憑解鎖兌換碼獲得專屬消費折扣與來店禮！</p>
+        </div>
+
+        <!-- 8 家店家卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="shopListContainer">
+          <!-- 由 JS 動態渲染 8 家店家卡片 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: 10-20 人團體協作與角色系統 -->
+    <section id="tab-team" class="tab-pane hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-user-group text-brand-600"></i>
+              小隊協作模式（10-20 人團體分工）
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">支援隊長、植物學家、文史官、補給官四種專業角色協同通關</p>
+          </div>
+          <button onclick="openRoleModal()" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 px-3 py-1.5 rounded-lg font-semibold transition">
+            <i class="fa-solid fa-id-badge"></i> 切換角色
+          </button>
+        </div>
+
+        <!-- 目前小隊狀態 -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base font-bold text-slate-900">第三小隊：水脈探險隊</span>
+              <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">4 人在線</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">您的當前身分：<strong class="text-brand-700" id="currentRoleText">植物學家（特徵比對專用加成）</strong></p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-xs text-slate-400">目前團隊積分</div>
+              <div class="text-xl font-black text-brand-600">320 pts</div>
+            </div>
+            <div class="h-8 w-px bg-slate-300"></div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400">目前競賽排行</div>
+              <div class="text-xl font-black text-amber-500">第 2 名</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 四種角色特權卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <div class="border border-slate-200 rounded-xl p-3 bg-white hover:border-brand-300 transition">
+            <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm mb-2">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <h4 class="font-bold text-sm text-slate-800">小隊隊長</h4>
+            <p class="text-[11px] text-slate-500 mt-1">統籌全隊路線、提交最終關卡答案、確認店家驗證碼解鎖全隊獎勵。</p>
+            <div class="mt-2 text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded inline-block font-semibold">特權：最終驗證審核</div>
+          </div>
+
+          <div class="border-2 border-emerald-500 rounded-xl p-3 bg-emerald-50/40 relative">
+            <span class="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">目前身分</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm mb-2">
+              <i class="fa-solid fa-seedling"></i>
+            </div>
+            <h4 class="font-bold text-sm text-slate-800">植物學家</h4>
+            <p class="text-[11px] text-slate-500 mt-1">專屬 90 幅植物微距特寫辨識線索，辨識水生與喬木享雙倍積分。</p>
+            <div class="mt-2 text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded inline-block font-semibold">特權：解鎖特寫線索</div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-3 bg-white hover:border-brand-300 transition">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm mb-2">
+              <i class="fa-solid fa-landmark"></i>
+            </div>
+            <h4 class="font-bold text-sm text-slate-800">文史官</h4>
+            <p class="text-[11px] text-slate-500 mt-1">六家庄歷史拓樸、問禮堂百年三合院與客家水圳先民歷史解密提示。</p>
+            <div class="mt-2 text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded inline-block font-semibold">特權：歷史謎題提示</div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-3 bg-white hover:border-brand-300 transition">
+            <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-sm mb-2">
+              <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <h4 class="font-bold text-sm text-slate-800">補給官</h4>
+            <p class="text-[11px] text-slate-500 mt-1">掌握 8 家在地商圈即時優惠額度與飲水補給站地圖，發起休息茶點。</p>
+            <div class="mt-2 text-[10px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded inline-block font-semibold">特權：店家折扣強化</div>
+          </div>
+        </div>
+
+        <!-- 小隊競賽排行榜 -->
+        <div class="mt-6">
+          <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-trophy text-amber-500"></i>
+            今日實境探索・各小隊即時戰況
+          </h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-200 text-xs">
+              <div class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full bg-amber-400 text-white font-bold flex items-center justify-center text-xs">1</span>
+                <div>
+                  <div class="font-bold text-slate-800">第一小隊：東興巡航者</div>
+                  <div class="text-[10px] text-slate-500">已解鎖 4 關卡・圖鑑解鎖率 42%</div>
+                </div>
+              </div>
+              <div class="font-extrabold text-amber-600 text-sm">410 pts</div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border-2 border-emerald-400 text-xs shadow-sm">
+              <div class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs">2</span>
+                <div>
+                  <div class="font-bold text-emerald-950 flex items-center gap-1">第三小隊：水脈探險隊 <span class="bg-emerald-200 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded font-semibold">我們這組</span></div>
+                  <div class="text-[10px] text-emerald-700">已解鎖 2 關卡・圖鑑解鎖率 20%</div>
+                </div>
+              </div>
+              <div class="font-extrabold text-emerald-700 text-sm">320 pts</div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+              <div class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs">3</span>
+                <div>
+                  <div class="font-bold text-slate-800">第二小隊：六家老樹群</div>
+                  <div class="text-[10px] text-slate-500">已解鎖 2 關卡・圖鑑解鎖率 18%</div>
+                </div>
+              </div>
+              <div class="font-extrabold text-slate-600 text-sm">290 pts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 底部固定導航標籤欄 (手機 PWA 友善體驗) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-2 md:max-w-md md:mx-auto md:bottom-3 md:rounded-2xl md:border md:shadow-lg">
+    <div class="flex justify-around items-center text-center">
+      <button onclick="switchTab('quest')" class="nav-btn active flex-1 py-1 flex flex-col items-center text-brand-600 font-bold transition" data-target="quest">
+        <i class="fa-solid fa-puzzle-piece text-lg mb-0.5"></i>
+        <span class="text-[10px]">實境解謎</span>
+      </button>
+
+      <button onclick="switchTab('360')" class="nav-btn flex-1 py-1 flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium transition" data-target="360">
+        <i class="fa-solid fa-street-view text-lg mb-0.5"></i>
+        <span class="text-[10px]">360 環景 (28)</span>
+      </button>
+
+      <button onclick="switchTab('plants')" class="nav-btn flex-1 py-1 flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium transition" data-target="plants">
+        <i class="fa-solid fa-leaf text-lg mb-0.5"></i>
+        <span class="text-[10px]">植物圖鑑 (90)</span>
+      </button>
+
+      <button onclick="switchTab('shops')" class="nav-btn flex-1 py-1 flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium transition" data-target="shops">
+        <i class="fa-solid fa-store text-lg mb-0.5"></i>
+        <span class="text-[10px]">合作店家 (8)</span>
+      </button>
+
+      <button onclick="switchTab('team')" class="nav-btn flex-1 py-1 flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium transition" data-target="team">
+        <i class="fa-solid fa-users text-lg mb-0.5"></i>
+        <span class="text-[10px]">小隊協作</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 關卡詳細與解謎驗證 Modal -->
+  <div id="questModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 relative shadow-2xl">
+      <button onclick="closeQuestModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div id="questModalContent">
+        <!-- 動態填入關卡內容 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 植物詳情 Modal -->
+  <div id="plantModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 relative shadow-2xl">
+      <button onclick="closePlantModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="plantModalContent">
+        <!-- 動態填入植物資訊 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 店家優惠券 QR Code Modal -->
+  <div id="couponModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center relative shadow-2xl">
+      <button onclick="closeCouponModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="couponModalContent">
+        <!-- 動態店家優惠券內容 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 角色更換 Modal -->
+  <div id="roleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 relative shadow-2xl">
+      <button onclick="closeRoleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h3 class="font-bold text-slate-800 text-base mb-2">切換小隊角色分工</h3>
+      <p class="text-xs text-slate-500 mb-4">每個角色具備不同的任務解密加成與專屬視角線索</p>
+      
+      <div class="space-y-2">
+        <button onclick="selectRole('captain', '小隊隊長（全域審核特權）')" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold"><i class="fa-solid fa-crown"></i></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800">小隊隊長</div>
+            <div class="text-[10px] text-slate-500">隊伍進度統籌與最終驗證權限</div>
+          </div>
+        </button>
+
+        <button onclick="selectRole('botanist', '植物學家（特徵比對專用加成）')" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold"><i class="fa-solid fa-seedling"></i></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800">植物學家</div>
+            <div class="text-[10px] text-slate-500">水生與喬木圖鑑微距特徵解讀加成</div>
+          </div>
+        </button>
+
+        <button onclick="selectRole('historian', '文史官（客家古厝提示加成）')" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold"><i class="fa-solid fa-landmark"></i></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800">文史官</div>
+            <div class="text-[10px] text-slate-500">三合院瓦當、客家水圳歷史專屬線索</div>
+          </div>
+        </button>
+
+        <button onclick="selectRole('quartermaster', '補給官（店家優惠強化）')" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold"><i class="fa-solid fa-mug-hot"></i></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800">補給官</div>
+            <div class="text-[10px] text-slate-500">商圈飲水補給、特約店家消費折扣強化</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       專案核心數據結構（嚴格依據規格書配置）
+       ========================================================= */
+
+    // 1. 六大實境解謎關卡（四段式閉環設計）
+    const QUESTS = [
+      {
+        id: 1,
+        title: "第一關：公24公園・水脈初醒之印",
+        zone: "Zone A",
+        location: "公24公園親水平台",
+        status: "completed", // completed, active, locked
+        step1_online: "360 全景探索水閘門與開圳石碑",
+        step2_field: "實地踏查水岸平台，比對落羽松與水柳樹幹紋理",
+        step3_verify: "輸入紀念石碑上刻寫之乾隆開圳年代",
+        step4_reward: "解鎖【水圳之丘咖啡館】飲品現折 20 元",
+        answer: "1748",
+        clue: "石碑位於水岸木棧道轉角處，注意觀察陰刻的四位數字年代。",
+        rewardShop: "水圳之丘咖啡館",
+        rewardDesc: "完成任務享飲品折 20 元，免費補充飲水",
+        score: 100
+      },
+      {
+        id: 2,
+        title: "第二關：景觀綠廊・綠蔭密語尋芳",
+        zone: "Zone B",
+        location: "東興圳景觀步道（水柳與落羽松綠廊）",
+        status: "completed",
+        step1_online: "比對 B1-B4 綠廊 360 環景林冠層密度",
+        step2_field: "尋找步道旁蜜源植物「長穗木」之藍紫色花穗",
+        step3_verify: "計算長穗木單一花軸平均綻放花朵數",
+        step4_reward: "解鎖【六家禾穀手作烘焙】贈東興圳造型脆餅",
+        answer: "5",
+        clue: "請於步道向陽側灌木叢尋找有長長穗狀花序的植物。",
+        rewardShop: "六家禾穀手作烘焙",
+        rewardDesc: "比對門口香草植物特徵，贈送「東興圳造型小脆餅」一片",
+        score: 100
+      },
+      {
+        id: 3,
+        title: "第三關：六家民俗公園・紅磚舊事客家心",
+        zone: "Zone C",
+        location: "問禮堂、忠孝堂百年三合院周邊",
+        status: "active",
+        step1_online: "於 C1-C5 360 視角尋找古厝正身瓦當與剪黏特徵",
+        step2_field: "實地踏訪問禮堂燕尾脊，尋找客家先民避邪磚雕",
+        step3_verify: "輸入客家水圳先民祖堂堂號",
+        step4_reward: "解鎖【風城擂茶】滿200折30與【竹北讀字】購書85折",
+        answer: "問禮堂",
+        clue: "抬頭觀察三合院正門上方之匾額題字。",
+        rewardShop: "風城擂茶與客家輕食",
+        rewardDesc: "解讀老照片族譜代碼，消費滿 200 折 30 元，贈特色茶包",
+        score: 120
+      },
+      {
+        id: 4,
+        title: "第四關：公26公園・綠島水生微聚落",
+        zone: "Zone D",
+        location: "公26公園生態綠島與水生池",
+        status: "locked",
+        step1_online: "於 D1-D4 視角觀察浮水與挺水植物分布界線",
+        step2_field: "實地比對水生池中的「野薑花」白花特徵與香蒲燭狀花序",
+        step3_verify: "輸入水生植物淨化水質之關鍵沉水植物名稱",
+        step4_reward: "解鎖【泉源自然系茶飲】外帶大杯現折 10 元",
+        answer: "金魚藻",
+        clue: "池邊解說牌詳細記錄了水生池五種淨水植物的分層。",
+        rewardShop: "泉源自然系茶飲",
+        rewardDesc: "觀察店外蜜源植物打卡，外帶大杯現折 10 元",
+        score: 110
+      },
+      {
+        id: 5,
+        title: "第五關：公27與公28公園・枝繁葉茂守護者",
+        zone: "Zone E & F",
+        location: "水圳歷史記憶廣場與老樹群草坪",
+        status: "locked",
+        step1_online: "360 全景搜尋百年老榕與烏桕樹冠的共生鳥巢",
+        step2_field: "採集落地的烏桕菱形葉片與台灣欒樹蒴果進行比對",
+        step3_verify: "輸入公27廣場古水車輪軸的木材名稱",
+        step4_reward: "解鎖【綠意生活選品】9折與【沐光手作冰淇淋】85折",
+        answer: "相思木",
+        clue: "廣場中央復刻之水車標牌有詳細記載傳統車輪用料。",
+        rewardShop: "綠意生活文創選品店",
+        rewardDesc: "尋找櫥窗隱藏 QR Code 圖章，選品 9 折贈手繪明信片",
+        score: 130
+      },
+      {
+        id: 6,
+        title: "第六關：汾陽堂・溯源匯流歡慶終點",
+        zone: "Zone G",
+        location: "汾陽堂與番仔寮水系支流交匯處",
+        status: "locked",
+        step1_online: "於 G1-G3 視角完成全圳水系合流總覽",
+        step2_field: "全體小隊於終點廣場集合，比對全線圖鑑解鎖率",
+        step3_verify: "隊長輸入終點站客家祈福通關密碼",
+        step4_reward: "前往【豐禾低卡健康廚房】聚餐享團體 9 折與生菜沙拉",
+        answer: "水潤東興",
+        clue: "由 4 位隊員分別出示各自角色卡片湊成四字密令！",
+        rewardShop: "豐禾低卡健康廚房",
+        rewardDesc: "落實環保餐具聚餐打卡，團體預約 9 折贈水耕生菜沙拉",
+        score: 150
+      }
+    ];
+
+    // 2. 28 幅 360 實景照片節點規劃（分區 A ~ G）
+    const ZONES = [
+      {
+        code: "Zone A",
+        name: "公24公園（水岸入口與親水平台）",
+        count: 4,
+        nodes: [
+          { id: "A1", title: "公24水岸入口全景", desc: "入口集合說明與親水木棧道全貌", panoBg: "#1a3a2a" },
+          { id: "A2", title: "開圳紀念石碑視角", desc: "紀念石碑特徵比對與清代刻文字樣", panoBg: "#1f4532" },
+          { id: "A3", title: "水閘門結構熱點", desc: "引水閘門古今工法結構對照", panoBg: "#163826" },
+          { id: "A4", title: "落羽松親水平台", desc: "落羽松氣生根與親水護岸生態", panoBg: "#234d38" }
+        ]
+      },
+      {
+        code: "Zone B",
+        name: "東興圳景觀步道（綠廊）",
+        count: 4,
+        nodes: [
+          { id: "B1", title: "水柳步道起點", desc: "垂柳親水枝條與步道微氣候環境", panoBg: "#1b4030" },
+          { id: "B2", title: "落羽松林間步道", desc: "四季葉色變幻與林冠採光特點", panoBg: "#224735" },
+          { id: "B3", title: "生態廊道交會處", desc: "地被植物長穗木與蟛蜞菊叢生點", panoBg: "#1c3c2b" },
+          { id: "B4", title: "綠意親水小橋", desc: "眺望圳道中游水生波紋與魚群", panoBg: "#1e4d36" }
+        ]
+      },
+      {
+        code: "Zone C",
+        name: "六家民俗公園（古厝歷史）",
+        count: 5,
+        nodes: [
+          { id: "C1", title: "問禮堂正身埕前", desc: "客家傳統三合院燕尾脊與門樓", panoBg: "#4a2a1a" },
+          { id: "C2", title: "忠孝堂外側磚牆", desc: "百年紅磚斗子砌與卵石基礎工法", panoBg: "#523220" },
+          { id: "C3", title: "瓦當剪黏屋脊細部", desc: "鳳凰與花鳥吉祥剪黏藝術熱點", panoBg: "#482818" },
+          { id: "C4", title: "古井與引水支渠", desc: "聚落生活取水井與圳道交織口", panoBg: "#3a2d22" },
+          { id: "C5", title: "老榕遮蔭書香埕", desc: "地方聚會與文史展示迴廊", panoBg: "#42281a" }
+        ]
+      },
+      {
+        code: "Zone D",
+        name: "公26公園（生態綠島與水生池）",
+        count: 4,
+        nodes: [
+          { id: "D1", title: "水生生態島入口", desc: "多層次水岸植物過濾淨化系統", panoBg: "#1d3b37" },
+          { id: "D2", title: "香蒲與野薑花群落", desc: "挺水植物開花特徵與香氣識別", panoBg: "#21443f" },
+          { id: "D3", title: "睡蓮浮葉觀測台", desc: "浮葉植物與水生昆蟲棲息地", panoBg: "#193632" },
+          { id: "D4", title: "生態池溢流堰", desc: "水生池與主流水位調節工法", panoBg: "#1e4741" }
+        ]
+      },
+      {
+        code: "Zone E",
+        name: "公27公園（水圳歷史記憶廣場）",
+        count: 4,
+        nodes: [
+          { id: "E1", title: "水圳歷史記憶景觀", desc: "古代引水暗渠意象復刻展示", panoBg: "#2d3326" },
+          { id: "E2", title: "木製水車模型節點", desc: "客家農耕水力灌溉原理演示", panoBg: "#353b2e" },
+          { id: "E3", title: "農具意象涼亭", desc: "先民耙田、收割器具刻紋比對", panoBg: "#282d22" },
+          { id: "E4", title: "水圳年表地圖碑", desc: "東興圳歷代修築歷史拓印區", panoBg: "#313829" }
+        ]
+      },
+      {
+        code: "Zone F",
+        name: "公28公園（綠意草坪與老樹群）",
+        count: 4,
+        nodes: [
+          { id: "F1", title: "百年老榕樹冠視野", desc: "巨大老榕氣根如柱生態景觀", panoBg: "#1c3820" },
+          { id: "F2", title: "烏桕林蔭休憩區", desc: "菱形葉片與秋冬紅葉特寫比對", panoBg: "#234228" },
+          { id: "F3", title: "欒樹四季色彩廣場", desc: "台灣欒樹黃花與紅蒴果交織", panoBg: "#1b331f" },
+          { id: "F4", title: "鳥類棲息觀測點", desc: "五色鳥與白頭翁共生棲息檢視", panoBg: "#203e25" }
+        ]
+      },
+      {
+        code: "Zone G",
+        name: "汾陽堂與支流交匯處（終點）",
+        count: 3,
+        nodes: [
+          { id: "G1", title: "汾陽堂前水圳合流點", desc: "番仔寮支流匯入主流交會口", panoBg: "#3d2a1d" },
+          { id: "G2", title: "歷史合院大埕", desc: "大集結儀式與成果驗收頒獎點", panoBg: "#473223" },
+          { id: "G3", title: "水文化文創市集站", desc: "在地商圈合作店家兌換服務處", panoBg: "#3a2517" }
+        ]
+      }
+    ];
+
+    // 3. 90 幅植物微型圖鑑體系（五大分類，此處示範代表種與架構）
+    const PLANTS = [
+      // 挺水與濱水喬木區（25 種代表）
+      { id: 1, name: "落羽松", cat: "trees", catName: "挺水與濱水喬木", feature: "膝狀呼吸根、羽狀複葉秋冬轉紅褐色", zone: "Zone A, B", unlocked: true, photo: "🌲" },
+      { id: 2, name: "水柳", cat: "trees", catName: "挺水與濱水喬木", feature: "枝條下垂、耐水濕、護岸固土良木", zone: "Zone B", unlocked: true, photo: "🌿" },
+      { id: 3, name: "烏桕", cat: "trees", catName: "挺水與濱水喬木", feature: "菱形葉先端尾尖、葉柄具兩枚蜜腺", zone: "Zone F", unlocked: false, photo: "🍃" },
+      { id: 4, name: "台灣欒樹", cat: "trees", catName: "挺水與濱水喬木", feature: "二回羽狀複葉、秋季金黃花與粉紅蒴果", zone: "Zone F", unlocked: true, photo: "🍂" },
+      { id: 5, name: "苦楝", cat: "trees", catName: "挺水與濱水喬木", feature: "春季淡紫星狀小花、具淡淡清香", zone: "Zone E", unlocked: false, photo: "🌸" },
+      { id: 6, name: "阿勃勒", cat: "trees", catName: "挺水與濱水喬木", feature: "夏季金黃成串下垂總狀花序（黃金雨）", zone: "Zone A", unlocked: false, photo: "🌼" },
+      { id: 7, name: "茄苳", cat: "trees", catName: "挺水與濱水喬木", feature: "三出複葉、樹幹粗壯常具瘤狀突起", zone: "Zone C", unlocked: false, photo: "🌳" },
+      { id: 8, name: "老榕樹", cat: "trees", catName: "挺水與濱水喬木", feature: "懸垂氣生根觸地成支柱根、隱頭果", zone: "Zone F", unlocked: true, photo: "🌴" },
+
+      // 水生與濕地植物區（20 種代表）
+      { id: 9, name: "野薑花", cat: "water", catName: "水生與濕地植物", feature: "白花形如蝴蝶、散發濃郁芳香、地下根狀莖", zone: "Zone D", unlocked: true, photo: "🤍" },
+      { id: 10, name: "香蒲（水燭）", cat: "water", catName: "水生與濕地植物", feature: "圓筒狀棕褐色肉穗花序形似蠟燭", zone: "Zone D", unlocked: true, photo: "🕯️" },
+      { id: 11, name: "黃花鳶尾", cat: "water", catName: "水生與濕地植物", feature: "鮮黃色大花、劍形翠綠葉片", zone: "Zone D", unlocked: false, photo: "🏵️" },
+      { id: 12, name: "大萍（水芙蓉）", cat: "water", catName: "水生與濕地植物", feature: "葉片如綻放蓮花、密生白色絨毛防水", zone: "Zone D", unlocked: false, photo: "🍀" },
+      { id: 13, name: "睡蓮", cat: "water", catName: "水生與濕地植物", feature: "圓形浮水葉具V型缺刻、晝開夜合", zone: "Zone D", unlocked: true, photo: "🪷" },
+      { id: 14, name: "慈姑", cat: "water", catName: "水生與濕地植物", feature: "剪刀狀（箭形）挺水葉片、白色小花", zone: "Zone D", unlocked: false, photo: "🌱" },
+
+      // 岸邊綠籬與灌木區（20 種代表）
+      { id: 15, name: "長穗木", cat: "shrubs", catName: "岸邊綠籬與灌木", feature: "藍紫色小花點綴於長條穗狀花序", zone: "Zone B", unlocked: true, photo: "🌾" },
+      { id: 16, name: "金露花", cat: "shrubs", catName: "岸邊綠籬與灌木", feature: "總狀花序下垂、藍紫花冠、金黃球形核果", zone: "Zone A, C", unlocked: false, photo: "🟣" },
+      { id: 17, name: "朱槿", cat: "shrubs", catName: "岸邊綠籬與灌木", feature: "鮮紅花瓣、長長伸出之雌雄蕊筒", zone: "Zone C", unlocked: false, photo: "🌺" },
+      { id: 18, name: "野牡丹", cat: "shrubs", catName: "岸邊綠籬與灌木", feature: "桃紅色五瓣花、顯眼黃色雄蕊", zone: "Zone B", unlocked: false, photo: "🌸" },
+      { id: 19, name: "月橘（七里香）", cat: "shrubs", catName: "岸邊綠籬與灌木", feature: "白花極香、羽狀複葉揉碎具柑橘香氣", zone: "Zone E", unlocked: true, photo: "🌼" },
+
+      // 蜜源與誘蝶植物區（15 種代表）
+      { id: 20, name: "繁星花", cat: "nectar", catName: "蜜源與誘蝶植物", feature: "數十朵星形小花聚集成團、紅粉色系", zone: "Zone D, E", unlocked: true, photo: "⭐" },
+      { id: 21, name: "高士佛澤蘭", cat: "nectar", catName: "蜜源與誘蝶植物", feature: "青斑蝶最愛蜜源、白管狀小頭花", zone: "Zone D", unlocked: false, photo: "🦋" },
+      { id: 22, name: "馬利筋", cat: "nectar", catName: "蜜源與誘蝶植物", feature: "樺斑蝶食草、橙黃雙色特殊副花冠", zone: "Zone F", unlocked: false, photo: "🧡" },
+      { id: 23, name: "大花咸豐草", cat: "nectar", catName: "蜜源與誘蝶植物", feature: "四季盛開之白黃舌狀花、種子具倒鉤刺", zone: "Zone A~G", unlocked: true, photo: "🌼" },
+
+      // 地被與蕨類草本區（10 種代表）
+      { id: 24, name: "雷公根（蚶殼草）", cat: "herbs", catName: "地被與蕨類草本", feature: "圓腎形葉片邊緣具鈍鋸齒、匍匐蔓延", zone: "Zone B", unlocked: true, photo: "🍃" },
+      { id: 25, name: "雙花蟛蜞菊", cat: "herbs", catName: "地被與蕨類草本", feature: "金黃小菊頭狀花、親水護坡強韌地被", zone: "Zone A, B", unlocked: true, photo: "🌼" },
+      { id: 26, name: "含羞草", cat: "herbs", catName: "地被與蕨類草本", feature: "碰觸時羽狀小葉迅速閉合、粉紅絨球花", zone: "Zone E", unlocked: false, photo: "🌾" },
+      { id: 27, name: "車前草", cat: "herbs", catName: "地被與蕨類草本", feature: "基生卵形葉、直立長穗狀花序", zone: "Zone C", unlocked: false, photo: "🌱" }
+    ];
+
+    // 4. 在地商圈 8 家合作店家名單
+    const SHOPS = [
+      {
+        id: 1,
+        name: "水圳之丘咖啡館",
+        type: "精品手沖與水岸景觀咖啡",
+        address: "竹北市文興路一段水岸景觀街區",
+        questLink: "第一關：尋找 360 視角古董水龍頭年份解鎖任務",
+        offer: "完成任務享飲品折 20 元，免費補充飲水",
+        unlocked: true,
+        couponCode: "HILL-2026-A24",
+        tag: "飲品折抵",
+        icon: "fa-mug-saucer",
+        color: "amber"
+      },
+      {
+        id: 2,
+        name: "六家禾穀手作烘焙",
+        type: "新竹在地米穀天然酵母麵包",
+        address: "竹北市嘉豐南路一段美食街",
+        questLink: "第二關：比對門口香草植物特徵回答密碼",
+        offer: "贈送「東興圳造型小脆餅」一片",
+        unlocked: true,
+        couponCode: "GRAIN-CRACKER-99",
+        tag: "免費兌換",
+        icon: "fa-bread-slice",
+        color: "orange"
+      },
+      {
+        id: 3,
+        name: "風城擂茶與客家輕食",
+        type: "創新客家擂茶冰沙與米食點心",
+        address: "竹北六家民俗公園文創聚落內",
+        questLink: "第三關：解讀老照片牆上的開圳先民族譜代碼",
+        offer: "消費滿 200 折 30 元，贈特色茶包",
+        unlocked: false,
+        couponCode: "HAKKA-TEA-30",
+        tag: "滿額現折",
+        icon: "fa-bowl-rice",
+        color: "emerald"
+      },
+      {
+        id: 4,
+        name: "綠意生活文創選品店",
+        type: "竹塹工藝、手作陶器與植栽",
+        address: "竹北市文興路二段藝文廊道",
+        questLink: "第五關：尋找櫥窗隱藏 QR Code 實體圖章",
+        offer: "文創選品 9 折，贈手繪明信片",
+        unlocked: false,
+        couponCode: "GREEN-ART-90",
+        tag: "商品九折",
+        icon: "fa-shop",
+        color: "teal"
+      },
+      {
+        id: 5,
+        name: "泉源自然系茶飲",
+        type: "台灣在地高山茶、低糖無添加",
+        address: "竹北市嘉豐北路親水綠蔭旁",
+        questLink: "第四關：觀察店外植栽牆蜜源植物打卡",
+        offer: "外帶大杯現折 10 元，支援環保杯折抵",
+        unlocked: false,
+        couponCode: "PURE-SPRING-10",
+        tag: "外帶優惠",
+        icon: "fa-bottle-water",
+        color: "cyan"
+      },
+      {
+        id: 6,
+        name: "竹北讀字獨立書店",
+        type: "人文社科、在地文史書籍",
+        address: "竹北六家庄歷史聚落靜巷",
+        questLink: "第三關：地方志專區尋找六家庄文史索書號",
+        offer: "購書 85 折，贈東興圳手繪地圖書籤",
+        unlocked: false,
+        couponCode: "READ-BOOK-85",
+        tag: "購書折扣",
+        icon: "fa-book-open",
+        color: "indigo"
+      },
+      {
+        id: 7,
+        name: "沐光義式手作冰淇淋",
+        type: "在地小農水果手工低脂冰淇淋",
+        address: "公28公園對面景觀露天座",
+        questLink: "第五關：出示公26水生植物全數解鎖成就徽章",
+        offer: "雙球冰淇淋享團體 85 折優惠",
+        unlocked: false,
+        couponCode: "GELATO-LIGHT-85",
+        tag: "甜品八五折",
+        icon: "fa-ice-cream",
+        color: "rose"
+      },
+      {
+        id: 8,
+        name: "豐禾低卡健康廚房",
+        type: "低GI餐盒、水耕蔬菜生機輕食",
+        address: "竹北文興路一段番仔寮支流匯流處",
+        questLink: "第六關：終點午間聚餐打卡並落實環保餐具",
+        offer: "團體預約 9 折，贈水耕生菜沙拉",
+        unlocked: false,
+        couponCode: "HARVEST-GROUP-90",
+        tag: "團體特惠",
+        icon: "fa-carrot",
+        color: "green"
+      }
+    ];
+
+    /* =========================================================
+       畫面渲染與互動邏輯
+       ========================================================= */
+
+    let currentZoneIndex = 0;
+    let currentNodeIndex = 0;
+    let currentPlantCategory = 'all';
+
+    // 初始化渲染
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuests();
+      renderZoneTabs();
+      loadPanoNode(0, 0);
+      renderPlants();
+      renderShops();
+    });
+
+    // 頁籤切換
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-brand-600', 'font-bold');
+        btn.classList.add('text-slate-400', 'font-medium');
+      });
+
+      const targetPane = document.getElementById(`tab-${tabId}`);
+      if (targetPane) targetPane.classList.remove('hidden');
+
+      const targetBtn = document.querySelector(`.nav-btn[data-target="${tabId}"]`);
+      if (targetBtn) {
+        targetBtn.classList.remove('text-slate-400', 'font-medium');
+        targetBtn.classList.add('text-brand-600', 'font-bold');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 渲染關卡卡片
+    function renderQuests() {
+      const container = document.getElementById('questsContainer');
+      container.innerHTML = QUESTS.map(q => {
+        const isCompleted = q.status === 'completed';
+        const isActive = q.status === 'active';
+        
+        let statusBadge = '';
+        let borderClass = 'border-slate-200 bg-white';
+        
+        if (isCompleted) {
+          statusBadge = '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fa-solid fa-check"></i> 已解鎖完成</span>';
+          borderClass = 'border-emerald-200 bg-emerald-50/20';
+        } else if (isActive) {
+          statusBadge = '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse"><i class="fa-solid fa-location-dot"></i> 當前進行中</span>';
+          borderClass = 'border-2 border-brand-500 bg-white shadow-md shadow-brand-500/10';
+        } else {
+          statusBadge = '<span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fa-solid fa-lock"></i> 尚未開啟</span>';
+          borderClass = 'border-slate-200 bg-slate-50 opacity-75';
+        }
+
+        return `
+          <div class="rounded-2xl p-4 border transition hover:shadow-md ${borderClass} flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">${q.zone}</span>
+                ${statusBadge}
+              </div>
+              <h4 class="font-bold text-slate-800 text-sm leading-snug">${q.title}</h4>
+              <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                <i class="fa-solid fa-compass text-emerald-600"></i> ${q.location}
+              </p>
+
+              <!-- 四段閉環流程展示 -->
+              <div class="mt-3 space-y-1.5 text-[11px] bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                <div class="flex items-start gap-1.5 text-slate-600">
+                  <span class="w-4 h-4 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[9px] shrink-0">1</span>
+                  <span><strong>線上：</strong>${q.step1_online}</span>
+                </div>
+                <div class="flex items-start gap-1.5 text-slate-600">
+                  <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-[9px] shrink-0">2</span>
+                  <span><strong>實地：</strong>${q.step2_field}</span>
+                </div>
+                <div class="flex items-start gap-1.5 text-slate-600">
+                  <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-[9px] shrink-0">3</span>
+                  <span><strong>驗證：</strong>${q.step3_verify}</span>
+                </div>
+                <div class="flex items-start gap-1.5 text-brand-700 font-medium">
+                  <span class="w-4 h-4 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-[9px] shrink-0">4</span>
+                  <span><strong>獎勵：</strong>${q.step4_reward}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-600">+${q.score} pts</span>
+              ${isActive ? `
+                <button onclick="openQuestModal(${q.id})" class="bg-brand-600 hover:bg-brand-700 text-white text-xs px-3.5 py-1.5 rounded-xl font-bold shadow-md shadow-brand-500/20 transition flex items-center gap-1">
+                  實境解題驗證 <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+              ` : isCompleted ? `
+                <button onclick="openQuestModal(${q.id})" class="text-emerald-700 bg-emerald-50 hover:bg-emerald-100 text-xs px-3 py-1.5 rounded-xl font-semibold border border-emerald-200 transition">
+                  查看任務回顧
+                </button>
+              ` : `
+                <button disabled class="text-slate-400 bg-slate-100 text-xs px-3 py-1.5 rounded-xl font-medium cursor-not-allowed">
+                  依序解鎖
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 關卡 Modal
+    function openQuestModal(questId) {
+      const q = QUESTS.find(item => item.id === questId);
+      if (!q) return;
+
+      const isCompleted = q.status === 'completed';
+      const modal = document.getElementById('questModal');
+      const content = document.getElementById('questModalContent');
+
+      content.innerHTML = `
+        <div class="text-center pb-3 border-b border-slate-100">
+          <span class="text-[10px] font-bold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">${q.zone}</span>
+          <h3 class="text-lg font-bold text-slate-800 mt-1">${q.title}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">${q.location}</p>
+        </div>
+
+        <div class="py-4 space-y-3">
+          <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+            <div class="font-bold mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i> 線索指引：
+            </div>
+            ${q.clue}
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">
+            <div class="font-bold text-slate-700 mb-1">對應解鎖商圈：</div>
+            <div class="text-brand-800 font-semibold">${q.rewardShop}</div>
+            <div class="text-slate-500 text-[11px] mt-0.5">${q.rewardDesc}</div>
+          </div>
+
+          ${isCompleted ? `
+            <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 text-center">
+              <div class="text-emerald-700 font-bold text-sm mb-1"><i class="fa-solid fa-circle-check"></i> 本關已通關驗證成功！</div>
+              <p class="text-xs text-slate-600">正確解答：<strong class="text-slate-800">${q.answer}</strong></p>
+              <button onclick="switchTab('shops'); closeQuestModal();" class="mt-3 bg-emerald-600 text-white text-xs px-4 py-2 rounded-xl font-bold shadow hover:bg-emerald-700 transition">
+                前往合作店家出示優惠券
+              </button>
+            </div>
+          ` : `
+            <div class="space-y-2 pt-2">
+              <label class="block text-xs font-bold text-slate-700">實地踏查驗證密碼輸入：</label>
+              <input type="text" id="questInputAnswer" placeholder="請根據現場踏查線索輸入答案..." class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 font-medium">
+              <p class="text-[10px] text-slate-400">提示：隊長確認無誤後即可送出驗證，全隊同步解鎖積分與店家優惠券。</p>
+
+              <button onclick="submitQuestAnswer(${q.id})" class="w-full mt-2 bg-brand-600 hover:bg-brand-700 text-white text-xs py-3 rounded-xl font-bold shadow-lg shadow-brand-500/20 transition">
+                驗證通關並解鎖店家獎勵
+              </button>
+            </div>
+          `}
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeQuestModal() {
+      document.getElementById('questModal').classList.add('hidden');
+    }
+
+    function submitQuestAnswer(questId) {
+      const q = QUESTS.find(item => item.id === questId);
+      const input = document.getElementById('questInputAnswer');
+      if (!input || !q) return;
+
+      const userVal = input.value.trim();
+      if (!userVal) {
+        alert("請先輸入實地踏查答案！");
+        return;
+      }
+
+      if (userVal.toLowerCase() === q.answer.toLowerCase() || userVal.includes(q.answer)) {
+        q.status = 'completed';
+        
+        // 解鎖下一關
+        const nextQuest = QUESTS.find(item => item.id === questId + 1);
+        if (nextQuest) nextQuest.status = 'active';
+
+        // 解鎖對應店家優惠
+        const shop = SHOPS.find(s => s.name === q.rewardShop);
+        if (shop) shop.unlocked = true;
+
+        alert(`🎉 恭喜回答正確！獲得 ${q.score} 積分！\n已成功解鎖【${q.rewardShop}】專屬來店禮與優惠！`);
+        
+        document.getElementById('questSolvedCount').innerText = QUESTS.filter(x => x.status === 'completed').length;
+        document.getElementById('couponCount').innerText = SHOPS.filter(x => x.unlocked).length;
+        
+        renderQuests();
+        renderShops();
+        closeQuestModal();
+      } else {
+        alert("答案不正確喔！請小隊成員再次觀察 360 環景或現場說明標牌線索！");
+      }
+    }
+
+    // 渲染 360 分區切換鈕
+    function renderZoneTabs() {
+      const container = document.getElementById('zoneTabsContainer');
+      container.innerHTML = ZONES.map((zone, idx) => `
+        <button onclick="selectZone(${idx})" class="zone-btn shrink-0 text-xs px-3 py-1.5 rounded-full border transition font-medium ${idx === 0 ? 'bg-water-600 text-white border-water-600 font-bold shadow-sm' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}">
+          ${zone.code} (${zone.count})
+        </button>
+      `).join('');
+    }
+
+    function selectZone(zoneIndex) {
+      currentZoneIndex = zoneIndex;
+      document.querySelectorAll('.zone-btn').forEach((btn, idx) => {
+        if (idx === zoneIndex) {
+          btn.className = "zone-btn shrink-0 text-xs px-3 py-1.5 rounded-full border transition font-bold bg-water-600 text-white border-water-600 shadow-sm";
+        } else {
+          btn.className = "zone-btn shrink-0 text-xs px-3 py-1.5 rounded-full border transition font-medium bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100";
+        }
+      });
+      loadPanoNode(zoneIndex, 0);
+    }
+
+    function loadPanoNode(zoneIndex, nodeIndex) {
+      currentNodeIndex = nodeIndex;
+      const zone = ZONES[zoneIndex];
+      const node = zone.nodes[nodeIndex];
+
+      document.getElementById('panoBadge').innerText = `${zone.code}・${node.id} 視角`;
+      document.getElementById('panoTitle').innerText = node.title;
+      document.getElementById('panoDesc').innerText = node.desc;
+      document.getElementById('panoIndexText').innerText = `節點 ${nodeIndex + 1} / ${zone.count} (${node.id})`;
+
+      // 更新背景色彩模擬切換全景
+      const bg = document.getElementById('panoBackground');
+      bg.style.backgroundImage = `radial-gradient(circle, ${node.panoBg}ee 0%, #081a10 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 12px)`;
+
+      // 渲染分區內節點按鈕
+      const listContainer = document.getElementById('nodeListContainer');
+      listContainer.innerHTML = zone.nodes.map((n, i) => `
+        <button onclick="loadPanoNode(${zoneIndex}, ${i})" class="p-2.5 rounded-xl border text-left transition flex items-center gap-2 ${i === nodeIndex ? 'border-water-500 bg-water-50 text-water-900 font-bold' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'}">
+          <span class="w-6 h-6 rounded-lg bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0 ${i === nodeIndex ? 'bg-water-500 text-white' : ''}">${n.id}</span>
+          <div class="truncate text-xs">${n.title}</div>
+        </button>
+      `).join('');
+    }
+
+    function interactHotspot(type) {
+      if (type === 'stone') {
+        alert("【熱點資訊・開圳石碑】\n銘文記載竹北六家庄引頭前溪水灌溉九芎林之開圳沿革，建於清乾隆十三年（1748）。\n💡 提示：此年份為第一關解鎖金鑰！");
+      } else {
+        alert("【熱點資訊・百年水閘門】\n現存水閘門保留傳統螺桿與石砌水檻構造，是了解東興圳水利分流歷史的重要實物資產。");
+      }
+    }
+
+    // 植物微型圖鑑篩選與渲染
+    function setPlantCategory(cat) {
+      currentPlantCategory = cat;
+      document.querySelectorAll('.plant-cat-btn').forEach(btn => {
+        if (btn.dataset.category === cat) {
+          btn.className = "plant-cat-btn active px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-brand-600 text-white shadow-sm";
+        } else {
+          btn.className = "plant-cat-btn px-3 py-1.5 rounded-full font-medium transition shrink-0 bg-slate-100 text-slate-600 hover:bg-slate-200";
+        }
+      });
+      renderPlants();
+    }
+
+    function filterPlants() {
+      renderPlants();
+    }
+
+    function renderPlants() {
+      const container = document.getElementById('plantGridContainer');
+      const searchVal = document.getElementById('plantSearchInput') ? document.getElementById('plantSearchInput').value.trim().toLowerCase() : '';
+
+      const filtered = PLANTS.filter(p => {
+        const matchesCat = currentPlantCategory === 'all' || p.cat === currentPlantCategory;
+        const matchesSearch = !searchVal || p.name.toLowerCase().includes(searchVal) || p.feature.toLowerCase().includes(searchVal);
+        return matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400">查無相符植物，請嘗試更換分類或關鍵字</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => `
+        <div onclick="openPlantModal(${p.id})" class="cursor-pointer bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-brand-500 hover:shadow-md transition p-3 flex flex-col justify-between">
+          <div>
+            <div class="h-24 rounded-lg bg-emerald-50 flex items-center justify-center text-4xl mb-2 relative">
+              ${p.photo}
+              ${p.unlocked ? `
+                <span class="absolute top-1.5 right-1.5 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                  <i class="fa-solid fa-check text-[8px]"></i> 已解鎖
+                </span>
+              ` : `
+                <span class="absolute top-1.5 right-1.5 bg-slate-400 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                  <i class="fa-solid fa-lock text-[8px]"></i> 待踏查
+                </span>
+              `}
+            </div>
+            <div class="text-[10px] text-brand-700 font-semibold">${p.catName}</div>
+            <h4 class="font-bold text-slate-800 text-xs mt-0.5">${p.name}</h4>
+            <p class="text-[11px] text-slate-500 line-clamp-2 mt-1">${p.feature}</p>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+            <span>${p.zone}</span>
+            <span class="text-brand-600 font-medium">特寫比對 <i class="fa-solid fa-angle-right"></i></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openPlantModal(plantId) {
+      const p = PLANTS.find(item => item.id === plantId);
+      if (!p) return;
+
+      const modal = document.getElementById('plantModal');
+      const content = document.getElementById('plantModalContent');
+
+      content.innerHTML = `
+        <div class="text-center">
+          <div class="w-20 h-20 mx-auto rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-5xl mb-2 shadow-inner">
+            ${p.photo}
+          </div>
+          <span class="text-[10px] font-bold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">${p.catName}</span>
+          <h3 class="text-lg font-bold text-slate-800 mt-1">${p.name}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">主要分布：${p.zone}</p>
+        </div>
+
+        <div class="py-4 space-y-3 text-xs">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="font-bold text-slate-700 mb-1">原生特徵與辨識要點：</div>
+            <p class="text-slate-600 leading-relaxed">${p.feature}</p>
+          </div>
+
+          <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-emerald-900">
+            <div class="font-bold mb-1">植物學家專屬協作任務：</div>
+            <p class="text-[11px] text-emerald-800">在現場使用手機相機比對葉脈與花序，即可為全小隊解鎖生態標籤並賺取 +15 積分！</p>
+          </div>
+
+          <button onclick="togglePlantUnlock(${p.id})" class="w-full ${p.unlocked ? 'bg-slate-200 text-slate-700' : 'bg-brand-600 hover:bg-brand-700 text-white'} py-2.5 rounded-xl font-bold transition text-xs shadow">
+            ${p.unlocked ? '已標記為辨識完成（點選取消）' : '📷 實地特徵拍照比對完成・解鎖圖鑑'}
+          </button>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function togglePlantUnlock(plantId) {
+      const p = PLANTS.find(item => item.id === plantId);
+      if (p) {
+        p.unlocked = !p.unlocked;
+        document.getElementById('plantUnlockedCount').innerText = PLANTS.filter(x => x.unlocked).length;
+        renderPlants();
+        closePlantModal();
+      }
+    }
+
+    function closePlantModal() {
+      document.getElementById('plantModal').classList.add('hidden');
+    }
+
+    // 渲染 8 家在地合作店家
+    function renderShops() {
+      const container = document.getElementById('shopListContainer');
+      container.innerHTML = SHOPS.map(s => `
+        <div class="p-4 rounded-2xl border transition ${s.unlocked ? 'border-amber-300 bg-amber-50/20 shadow-sm' : 'border-slate-200 bg-white'} flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">${s.tag}</span>
+              ${s.unlocked ? `
+                <span class="text-emerald-700 text-xs font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-circle-check"></i> 已解鎖兌換
+                </span>
+              ` : `
+                <span class="text-slate-400 text-xs flex items-center gap-1">
+                  <i class="fa-solid fa-lock"></i> 關卡解鎖後啟用
+                </span>
+              `}
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid ${s.icon}"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-800 text-sm">${s.name}</h4>
+                <p class="text-xs text-slate-500">${s.type}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                  <i class="fa-solid fa-location-dot text-rose-500"></i> ${s.address}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-3 bg-white/80 rounded-xl p-2.5 border border-slate-100 text-xs space-y-1">
+              <div class="text-slate-500 text-[11px]"><strong>關卡任務連動：</strong>${s.questLink}</div>
+              <div class="text-amber-900 font-bold"><strong>優惠方案：</strong>${s.offer}</div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] text-slate-400">合作代碼：${s.id}</span>
+            ${s.unlocked ? `
+              <button onclick="openCouponModal(${s.id})" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs px-3.5 py-1.5 rounded-xl font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-qrcode"></i> 出示優惠憑證
+              </button>
+            ` : `
+              <button onclick="switchTab('quest')" class="text-slate-500 bg-slate-100 hover:bg-slate-200 text-xs px-3 py-1.5 rounded-xl font-medium transition">
+                前往關卡解鎖
+              </button>
+            `}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openCouponModal(shopId) {
+      const s = SHOPS.find(item => item.id === shopId);
+      if (!s) return;
+
+      const modal = document.getElementById('couponModal');
+      const content = document.getElementById('couponModalContent');
+
+      content.innerHTML = `
+        <div class="w-12 h-12 mx-auto rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xl mb-2">
+          <i class="fa-solid ${s.icon}"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">${s.name} 專屬優惠憑證</h3>
+        <p class="text-xs text-brand-700 font-bold mt-1">${s.offer}</p>
+
+        <!-- 虛擬 QR Code 模擬 -->
+        <div class="my-4 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-amber-300 inline-block">
+          <div class="w-36 h-36 mx-auto bg-white p-2 rounded-xl border border-slate-200 flex flex-col items-center justify-center shadow-sm">
+            <i class="fa-solid fa-qrcode text-6xl text-slate-800"></i>
+            <span class="text-[9px] font-mono text-slate-500 mt-2">${s.couponCode}</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500">請向店家出示此畫面由店員掃描核銷。<br>可享折抵優惠或兌換專屬來店禮！</p>
+        
+        <button onclick="closeCouponModal()" class="w-full mt-4 bg-slate-800 text-white text-xs py-2.5 rounded-xl font-bold">
+          關閉返回
+        </button>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCouponModal() {
+      document.getElementById('couponModal').classList.add('hidden');
+    }
+
+    // 角色設定 Modal
+    function openRoleModal() {
+      document.getElementById('roleModal').classList.remove('hidden');
+    }
+    function closeRoleModal() {
+      document.getElementById('roleModal').classList.add('hidden');
+    }
+    function selectRole(roleKey, roleName) {
+      document.getElementById('currentRoleText').innerText = roleName;
+      alert(`已將您的身分切換為：【${roleName}】！`);
+      closeRoleModal();
+    }
+  </script>
+</body>
+</html>
